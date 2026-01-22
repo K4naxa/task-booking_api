@@ -145,13 +145,6 @@ export class BookingsService {
   }
 
   async findByUser(userId: string) {
-    // Validate userId format
-    if (!/^[a-zA-Z0-9]+$/.test(userId)) {
-      throw new BadRequestException(
-        'userId must contain only alphanumeric characters',
-      );
-    }
-
     const bookings = await this.prisma.booking.findMany({
       where: { userId },
       include: { room: true },
