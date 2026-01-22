@@ -11,7 +11,7 @@ import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { BookingStatus } from '@prisma/client';
-import { UserIdValidationPipe } from 'src/common/pipes/user-id-validation.pipe';
+import { UserIdValidationPipe } from '../common/pipes/user-id-validation.pipe';
 
 @Controller('bookings')
 export class BookingsController {

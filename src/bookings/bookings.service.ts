@@ -33,57 +33,67 @@ export class BookingsService {
     if (start >= end) {
       throw new BadRequestException('startTime must be before endTime');
     }
+    try {
+      return await this.prisma.$transaction(
+        async (tx) => {
+          const room = await tx.room.findUnique({ where: { id: roomId } });
+          if (!room) {
+            throw new NotFoundException(`Room with id ${roomId} not found`);
+          }
 
-    // Check if room exists
-    const room = await this.prisma.room.findUnique({
-      where: { id: roomId },
-    });
-
-    if (!room) {
-      throw new NotFoundException(`Room with id ${roomId} not found`);
+          const overlappingBooking = await tx.booking.findFirst({
+            where: {
+              roomId,
+              status: BookingStatus.CONFIRMED,
+              OR: [
+                {
+                  AND: [
+                    { startTime: { lte: start } },
+                    { endTime: { gt: start } },
+                  ],
+                },
+                {
+                  AND: [{ startTime: { lt: end } }, { endTime: { gte: end } }],
+                },
+                {
+                  AND: [
+                    { startTime: { gte: start } },
+                    { endTime: { lte: end } },
+                  ],
+                },
+              ],
+            },
+          });
+          if (overlappingBooking) {
+            throw new ConflictException(
+              'Time slot conflicts with existing booking',
+            );
+          }
+          return tx.booking.create({
+            data: {
+              userId,
+              roomId,
+              startTime: start,
+              endTime: end,
+              status: BookingStatus.CONFIRMED,
+            },
+            include: { room: true },
+          });
+        },
+        { isolationLevel: 'Serializable' },
+      );
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ConflictException
+      ) {
+        throw error;
+      }
+      if (error.code === 'P2034') {
+        throw new ConflictException('Booking conflict detected, please retry');
+      }
+      throw error;
     }
-
-    // Check for overlapping CONFIRMED bookings
-    const overlappingBooking = await this.prisma.booking.findFirst({
-      where: {
-        roomId,
-        status: BookingStatus.CONFIRMED,
-        OR: [
-          {
-            // New booking starts during existing booking
-            AND: [{ startTime: { lte: start } }, { endTime: { gt: start } }],
-          },
-          {
-            // New booking ends during existing booking
-            AND: [{ startTime: { lt: end } }, { endTime: { gte: end } }],
-          },
-          {
-            // New booking encompasses existing booking
-            AND: [{ startTime: { gte: start } }, { endTime: { lte: end } }],
-          },
-        ],
-      },
-    });
-
-    if (overlappingBooking) {
-      throw new ConflictException('Time slot conflicts with existing booking');
-    }
-
-    // Create the booking
-    const booking = await this.prisma.booking.create({
-      data: {
-        userId,
-        roomId,
-        startTime: start,
-        endTime: end,
-        status: BookingStatus.CONFIRMED,
-      },
-      include: {
-        room: true,
-      },
-    });
-
-    return booking;
   }
 
   async cancel(id: number, cancelBookingDto: CancelBookingDto) {
