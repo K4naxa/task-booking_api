@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build output (will be created in container)
+dist/
+
+# Test files
+test/
+*.spec.ts
+coverage/
+
+# Environment files (use docker-compose environment instead)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database files (created fresh in container)
+*.db
+*.db-journal
+
+# Git
+.git/
+.gitignore
+
+# Docker files (not needed inside container)
+.dockerignore
+Dockerfile*
+docker-compose*.yml
+
+# Documentation
+README.md
+*.md
+
+# Logs
+*.log
+npm-debug.log*
