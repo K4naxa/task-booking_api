@@ -1911,3 +1911,44 @@ This is much cleaner and more readable while maintaining the same type safety.
 ```
 
 ---
+
+--- Operator Prompt:
+
+```
+Improve our booking tests to validate agains all of our business rules and Dto validations:
+
+Time Rules:
+- All times stored and returned in UTC ISO 8601 format
+- Time granularity is 10 minutes (times must align to :00, :10, :20, :30, :40, :50)
+- startTime MUST be in the future (compared to server time)
+- startTime MUST be before endTime
+
+Booking Rules:
+- A room CANNOT have overlapping CONFIRMED bookings
+- Overlaps are checked against CONFIRMED bookings only (CANCELED ignored)
+- Canceling a booking sets status to CANCELED and populates cancelledAt
+- No recurring bookings supported
+- A booking cannot be cancelled if already CANCELED
+- User can only cancel booking with same useId as in the request
+
+```
+
+---
+
+--- AI Response:
+
+```
+I'll help you improve the booking tests to validate all business rules and DTO validations. Let me first examine the existing test files and DTOs to understand the current coverage.
+
+Now let me create a comprehensive test suite that validates all business rules and DTO validations:
+
+Now let me create a comprehensive DTO validation test file:
+
+Now let's run the test suite to verify everything works correctly:
+
+npm test -- bookings.service.spec
+Excellent!
+
+```
+
+---

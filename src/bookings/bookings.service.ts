@@ -46,23 +46,8 @@ export class BookingsService {
             where: {
               roomId,
               status: BookingStatus.CONFIRMED,
-              OR: [
-                {
-                  AND: [
-                    { startTime: { lte: start } },
-                    { endTime: { gt: start } },
-                  ],
-                },
-                {
-                  AND: [{ startTime: { lt: end } }, { endTime: { gte: end } }],
-                },
-                {
-                  AND: [
-                    { startTime: { gte: start } },
-                    { endTime: { lte: end } },
-                  ],
-                },
-              ],
+              startTime: { lt: end }, // booking starts before requested end
+              endTime: { gt: start }, // booking ends after requested start
             },
           });
           if (overlappingBooking) {
