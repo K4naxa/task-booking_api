@@ -8,12 +8,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { BookingStatus } from '@prisma/client';
+import { BookingWithRoom } from 'src/common/types/room';
 
 @Injectable()
 export class BookingsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createBookingDto: CreateBookingDto) {
+  async create(createBookingDto: CreateBookingDto): Promise<BookingWithRoom> {
     const { userId, roomId, startTime, endTime } = createBookingDto;
 
     // Validate time format and granularity
@@ -96,7 +97,10 @@ export class BookingsService {
     }
   }
 
-  async cancel(id: number, cancelBookingDto: CancelBookingDto) {
+  async cancel(
+    id: number,
+    cancelBookingDto: CancelBookingDto,
+  ): Promise<BookingWithRoom> {
     const { userId } = cancelBookingDto;
 
     return await this.prisma.$transaction(async (tx) => {
@@ -144,7 +148,7 @@ export class BookingsService {
     });
   }
 
-  async findByUser(userId: string) {
+  async findByUser(userId: string): Promise<BookingWithRoom[]> {
     const bookings = await this.prisma.booking.findMany({
       where: { userId },
       include: { room: true },
@@ -154,7 +158,10 @@ export class BookingsService {
     return bookings;
   }
 
-  async findByRoom(roomId: number, status?: BookingStatus) {
+  async findByRoom(
+    roomId: number,
+    status?: BookingStatus,
+  ): Promise<BookingWithRoom[]> {
     // Check if room exists
     const room = await this.prisma.room.findUnique({
       where: { id: roomId },
