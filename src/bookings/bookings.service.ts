@@ -99,48 +99,49 @@ export class BookingsService {
   async cancel(id: number, cancelBookingDto: CancelBookingDto) {
     const { userId } = cancelBookingDto;
 
-    // Find booking by both id and userId
-    const booking = await this.prisma.booking.findFirst({
-      where: {
-        id,
-        userId,
-      },
-      include: {
-        room: true,
-      },
+    return await this.prisma.$transaction(async (tx) => {
+      // Find booking by both id and userId
+      const booking = await tx.booking.findUnique({
+        where: {
+          id_userId: {
+            id,
+            userId,
+          },
+        },
+        select: {
+          id: true,
+          startTime: true,
+          status: true,
+        },
+      });
+      // If not found, return 404
+      if (!booking) {
+        throw new NotFoundException(`Booking with id ${id} not found`);
+      }
+
+      // Check if already cancelled
+      if (booking.status === BookingStatus.CANCELLED) {
+        throw new ConflictException('Booking is already cancelled');
+      }
+
+      if (booking.startTime < new Date()) {
+        throw new BadRequestException(
+          'Cannot cancel a booking that has already started or is in the past',
+        );
+      }
+
+      // Update booking to cancelled
+      return await tx.booking.update({
+        where: { id },
+        data: {
+          status: BookingStatus.CANCELLED,
+          cancelledAt: new Date(),
+        },
+        include: {
+          room: true,
+        },
+      });
     });
-
-    // If not found, return 404
-    if (!booking) {
-      throw new NotFoundException(`Booking with id ${id} not found`);
-    }
-
-    // Check if already cancelled
-    if (booking.status === BookingStatus.CANCELLED) {
-      throw new ConflictException('Booking is already cancelled');
-    }
-
-    // Check if booking is in the past
-    const now = new Date();
-    if (booking.startTime <= now) {
-      throw new BadRequestException(
-        'Cannot cancel a booking that has already started or is in the past',
-      );
-    }
-
-    // Update booking to cancelled
-    const updatedBooking = await this.prisma.booking.update({
-      where: { id },
-      data: {
-        status: BookingStatus.CANCELLED,
-        cancelledAt: new Date(),
-      },
-      include: {
-        room: true,
-      },
-    });
-
-    return updatedBooking;
   }
 
   async findByUser(userId: string) {
