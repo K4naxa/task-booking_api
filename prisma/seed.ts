@@ -5,6 +5,9 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
+  // Clear existing bookings
+  await prisma.booking.deleteMany({});
+
   // Create 10 rooms
   for (let i = 1; i <= 10; i++) {
     await prisma.room.upsert({
