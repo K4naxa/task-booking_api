@@ -56,8 +56,6 @@ A REST API for managing meeting room bookings built with NestJS, TypeScript, Pri
    # Run migrations
    npx prisma migrate dev
 
-   # Seed the database with 10 rooms
-   npx prisma db seed
    ```
 
 4. **Start the development server**
