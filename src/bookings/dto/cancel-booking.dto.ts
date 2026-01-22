@@ -1,9 +1,3 @@
-import { IsString, Matches } from 'class-validator';
+import { UserIdDto } from '../../common/dto/user-id.dto';
 
-export class CancelBookingDto {
-  @IsString()
-  @Matches(/^[a-zA-Z0-9]+$/, {
-    message: 'userId must contain only alphanumeric characters',
-  })
-  userId: string;
-}
+export class CancelBookingDto extends UserIdDto {}

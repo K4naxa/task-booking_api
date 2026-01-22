@@ -11,6 +11,7 @@ import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { BookingStatus } from '@prisma/client';
+import { UserIdValidationPipe } from 'src/common/pipes/user-id-validation.pipe';
 
 @Controller('bookings')
 export class BookingsController {
@@ -30,7 +31,7 @@ export class BookingsController {
   }
 
   @Get('user/:userId')
-  findByUser(@Param('userId') userId: string) {
+  findByUser(@Param('userId', UserIdValidationPipe) userId: string) {
     return this.bookingsService.findByUser(userId);
   }
 

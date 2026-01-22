@@ -1747,6 +1747,50 @@ Successfully Tested:
 Usage:
 
 The Docker configuration now works correctly with Prisma v6 and the API is fully functional! 🚀
+```
 
 ---
+
+--- Operator Prompt:
+
 ```
+Task:
+
+- Create UserIdDto to be used in other dto's to follow DRY princible better.
+- Create user-id-validation.pipe.ts to be used in validating param values
+```
+
+---
+
+--- AI Response:
+
+```
+I'll create a UserIdDto and a validation pipe for user IDs. Let me first check the existing DTOs to understand the current patterns.
+
+Now I'll create the UserIdDto and the validation pipe. I can see the current pattern uses class-validator decorators for userId validation.
+
+Now let me update the existing DTOs to use the new UserIdDto following the DRY principle:
+
+Edited
+create-booking.dto.ts+0-0
+Edited
+cancel-booking.dto.ts+0-0
+Perfect! I've completed both tasks:
+
+Created UserIdDto - A reusable DTO that encapsulates userId validation with:
+
+@IsString() validation
+@Matches() regex validation for alphanumeric characters only
+Created UserIdValidationPipe - A custom pipe for validating userId param values that:
+
+Checks if userId is provided
+Validates it's a string
+Ensures it contains only alphanumeric characters
+Updated existing DTOs to follow DRY principle:
+
+CreateBookingDto now extends UserIdDto
+CancelBookingDto now extends UserIdDto
+The UserIdValidationPipe can be used in controllers like this:
+```
+
+---

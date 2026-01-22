@@ -1,12 +1,7 @@
-import { IsString, IsInt, IsDateString, Matches } from 'class-validator';
+import { IsInt, IsDateString } from 'class-validator';
+import { UserIdDto } from '../../common/dto/user-id.dto';
 
-export class CreateBookingDto {
-  @IsString()
-  @Matches(/^[a-zA-Z0-9]+$/, {
-    message: 'userId must contain only alphanumeric characters',
-  })
-  userId: string;
-
+export class CreateBookingDto extends UserIdDto {
   @IsInt()
   roomId: number;
 
