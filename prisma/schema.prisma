@@ -29,6 +29,8 @@ model Booking {
   updatedAt   DateTime      @updatedAt
 
   @@unique([id, userId])
+  @@index([roomId, status, startTime, endTime])
+  @@index([userId, startTime])
 }
 
 enum BookingStatus {
