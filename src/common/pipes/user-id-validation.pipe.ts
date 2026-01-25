@@ -1,29 +1,19 @@
-import {
-  PipeTransform,
-  Injectable,
-  ArgumentMetadata,
-  BadRequestException,
-} from '@nestjs/common';
-
+import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
+import { isAlphanumeric, isNotEmpty } from 'class-validator';
 @Injectable()
 export class UserIdValidationPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata) {
-    if (!value) {
+  transform(value: unknown): string {
+    if (!isNotEmpty(value)) {
       throw new BadRequestException('userId is required');
     }
-
     if (typeof value !== 'string') {
       throw new BadRequestException('userId must be a string');
     }
-
-    // Validate that userId contains only alphanumeric characters
-    const alphanumericRegex = /^[a-zA-Z0-9]+$/;
-    if (!alphanumericRegex.test(value)) {
+    if (!isAlphanumeric(value, 'en-US')) {
       throw new BadRequestException(
         'userId must contain only alphanumeric characters',
       );
     }
-
     return value;
   }
 }
