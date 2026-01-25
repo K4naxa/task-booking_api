@@ -50,6 +50,10 @@ A REST API for managing meeting room bookings built with NestJS, TypeScript, Pri
    npm install
    ```
 
+3. **Create env**
+
+- Create .env following .env-example
+
 3. **Set up the database**
 
    ```bash
@@ -529,6 +533,7 @@ npm test
 ```bash
 npm test -- rooms.controller.spec
 npm test -- bookings.controller.spec
+npm test -- bookings.service.spec
 ```
 
 ### Run Tests in Watch Mode
@@ -542,12 +547,6 @@ npm run test:watch
 ```bash
 npm run test:cov
 ```
-
-### Current Test Coverage
-
-- **35 tests** across all endpoints
-- Tests use real database (SQLite) for full integration testing
-- Validation, business logic, and error handling fully covered
 
 ---
 
@@ -591,37 +590,6 @@ enum BookingStatus {
 
 ---
 
-## 🔧 Development Commands
-
-```bash
-# Start development server with hot reload
-npm run start:dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm run start:prod
-
-# Run linter
-npm run lint
-
-# Format code
-npm run format
-
-# Generate Prisma Client
-npx prisma generate
-
-# Create migration
-npx prisma migrate dev --name <migration-name>
-
-# Reset database and reseed
-npx prisma migrate reset
-
-# Open Prisma Studio (database GUI)
-npx prisma studio
-```
-
 ---
 
 ## 📝 Notes
@@ -633,16 +601,3 @@ npx prisma studio
 - Validation is performed at both DTO and service layers
 
 ---
-
-## 🤝 Contributing
-
-1. Ensure all tests pass before committing
-2. Follow the existing code style (use `npm run format`)
-3. Add tests for new features
-4. Update this README for API changes
-
----
-
-## 📄 License
-
-This project is part of a coding assessment.
