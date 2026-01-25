@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { BookingStatus } from '@prisma/client';
 import { MutexService } from '../mutex/mutex.service';
+import { BookingValidationService } from './booking-validation.service';
 
 describe('BookingsService - Business Rules & Validations', () => {
   let service: BookingsService;
@@ -15,7 +16,12 @@ describe('BookingsService - Business Rules & Validations', () => {
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [BookingsService, PrismaService, MutexService],
+      providers: [
+        BookingsService,
+        PrismaService,
+        MutexService,
+        BookingValidationService,
+      ],
     }).compile();
 
     service = module.get<BookingsService>(BookingsService);

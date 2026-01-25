@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MutexService } from '../mutex/mutex.service';
+import { BookingValidationService } from './booking-validation.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { BookingStatus } from '@prisma/client';
@@ -16,28 +17,18 @@ export class BookingsService {
   constructor(
     private prisma: PrismaService,
     private mutex: MutexService,
+    private bookingValidation: BookingValidationService,
   ) {}
 
   async create(createBookingDto: CreateBookingDto): Promise<BookingWithRoom> {
     const { userId, roomId, startTime, endTime } = createBookingDto;
 
-    // Validate time format and granularity
-    const start = new Date(startTime);
-    const end = new Date(endTime);
+    // Validate booking times according to business rules
+    const { start, end } = this.bookingValidation.validateBookingTimes(
+      startTime,
+      endTime,
+    );
 
-    this.validateTimeGranularity(start, 'startTime');
-    this.validateTimeGranularity(end, 'endTime');
-
-    // Validate startTime is in the future
-    const now = new Date();
-    if (start <= now) {
-      throw new BadRequestException('startTime must be in the future');
-    }
-
-    // Validate startTime is before endTime
-    if (start >= end) {
-      throw new BadRequestException('startTime must be before endTime');
-    }
     try {
       return await this.mutex.executeWithLock(`room:${roomId}`, async () => {
         return await this.prisma.$transaction(
@@ -172,17 +163,5 @@ export class BookingsService {
     });
 
     return bookings;
-  }
-
-  private validateTimeGranularity(date: Date, fieldName: string) {
-    const minutes = date.getUTCMinutes();
-    const seconds = date.getUTCSeconds();
-    const milliseconds = date.getUTCMilliseconds();
-
-    if (minutes % 10 !== 0 || seconds !== 0 || milliseconds !== 0) {
-      throw new BadRequestException(
-        `${fieldName} must align to 10-minute intervals (e.g., :00, :10, :20, :30, :40, :50) with no seconds or milliseconds`,
-      );
-    }
   }
 }

@@ -1993,3 +1993,50 @@ The implementation ensures that bookings for the same room are serialized (preve
 ```
 
 ---
+
+--- Operator Prompt:
+
+```
+Create a `BookingValidationService` that extracts all business rule validations
+(future time, 10-minute intervals, end > start) from the booking flow.
+
+- DTO should only validate format (@IsISO8601)
+- Service methods should use `validate*` pattern and throw BadRequestException
+- Main method: `validateBookingTimes(startTime: string, endTime: string): { start: Date; end: Date }`
+- Update BookingsService.create() to use this validation service
+
+```
+
+--- AI Response:
+
+```
+I'll create a BookingValidationService to extract the validation logic and refactor the booking flow.
+
+Edited
+create-booking.dto.ts+3-3
+Starting: Update BookingsService (3/4)
+
+Edited
+bookings.service.ts+2-0
+Edited
+bookings.service.ts+6-17
+Edited
+bookings.service.ts+0-12
+Edited
+bookings.module.ts+2-1
+The refactoring is complete! I've successfully extracted all business rule validations into a dedicated BookingValidationService. Here's what was changed:
+
+Created Files
+booking-validation.service.ts - New validation service with:
+validateBookingTimes() - Main validation method that coordinates all checks
+validateTimeGranularity() - Ensures 10-minute intervals
+validateFutureTime() - Ensures startTime is in the future
+validateTimeOrder() - Ensures startTime < endTime
+Updated Files
+create-booking.dto.ts - Changed from @IsDateString() to @IsISO8601() for stricter format validation only
+bookings.service.ts - Replaced inline validation logic with bookingValidation.validateBookingTimes() call
+bookings.module.ts - Added BookingValidationService to providers
+The validation is now properly separated with DTOs handling format validation and the service handling business rules, following a clean architecture pattern.
+```
+
+---

@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UserIdValidationPipe } from '../common/pipes/user-id-validation.pipe';
 import { MutexService } from '../mutex/mutex.service';
+import { BookingValidationService } from './booking-validation.service';
 
 describe('BookingsController - Concurrent Bookings', () => {
   let app: INestApplication;
@@ -15,7 +16,12 @@ describe('BookingsController - Concurrent Bookings', () => {
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BookingsController],
-      providers: [BookingsService, PrismaService, MutexService],
+      providers: [
+        BookingsService,
+        PrismaService,
+        MutexService,
+        BookingValidationService,
+      ],
     }).compile();
 
     app = module.createNestApplication();
