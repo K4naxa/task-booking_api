@@ -7,6 +7,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { BookingStatus } from '@prisma/client';
+import { MutexService } from '../mutex/mutex.service';
 
 describe('BookingsService - Business Rules & Validations', () => {
   let service: BookingsService;
@@ -14,7 +15,7 @@ describe('BookingsService - Business Rules & Validations', () => {
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [BookingsService, PrismaService],
+      providers: [BookingsService, PrismaService, MutexService],
     }).compile();
 
     service = module.get<BookingsService>(BookingsService);

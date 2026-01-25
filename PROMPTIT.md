@@ -1952,3 +1952,44 @@ Excellent!
 ```
 
 ---
+
+--- Operator Prompt:
+
+```
+Implement a keyed async mutex for SQLite serialization.
+Requirements:
+
+- executeWithLock(key: string, fn: async () => T) — executes fn only after acquiring lock for key
+- Same keys serialize; different keys run concurrently
+- Key format: room:${roomId}
+
+
+- Use in #sym:create > wrap prisma transaction in executeWIthLock
+- Use already installed async-mutex library.
+```
+
+---
+
+--- AI Response:
+
+```
+I'll implement a keyed async mutex service for SQLite serialization and integrate it into the booking creation logic.
+
+Edited
+bookings.service.ts+39-33
+Edited
+bookings.module.ts+2-0
+Done! I've implemented a keyed async mutex for SQLite serialization:
+
+Created files:
+
+mutex.service.ts - Implements executeWithLock(key, fn) using async-mutex
+mutex.module.ts - Exports the mutex service
+Updated files:
+
+bookings.service.ts - Wrapped the Prisma transaction in executeWithLock with key room:${roomId}
+bookings.module.ts - Imported MutexModule
+The implementation ensures that bookings for the same room are serialized (preventing race conditions), while bookings for different rooms can run concurrently.
+```
+
+---

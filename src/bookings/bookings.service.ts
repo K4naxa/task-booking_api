@@ -5,6 +5,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { MutexService } from '../mutex/mutex.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { BookingStatus } from '@prisma/client';
@@ -12,7 +13,10 @@ import { BookingWithRoom } from 'src/common/types/room';
 
 @Injectable()
 export class BookingsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mutex: MutexService,
+  ) {}
 
   async create(createBookingDto: CreateBookingDto): Promise<BookingWithRoom> {
     const { userId, roomId, startTime, endTime } = createBookingDto;
@@ -35,39 +39,41 @@ export class BookingsService {
       throw new BadRequestException('startTime must be before endTime');
     }
     try {
-      return await this.prisma.$transaction(
-        async (tx) => {
-          const room = await tx.room.findUnique({ where: { id: roomId } });
-          if (!room) {
-            throw new NotFoundException(`Room with id ${roomId} not found`);
-          }
+      return await this.mutex.executeWithLock(`room:${roomId}`, async () => {
+        return await this.prisma.$transaction(
+          async (tx) => {
+            const room = await tx.room.findUnique({ where: { id: roomId } });
+            if (!room) {
+              throw new NotFoundException(`Room with id ${roomId} not found`);
+            }
 
-          const overlappingBooking = await tx.booking.findFirst({
-            where: {
-              roomId,
-              status: BookingStatus.CONFIRMED,
-              startTime: { lt: end }, // booking starts before requested end
-              endTime: { gt: start }, // booking ends after requested start
-            },
-          });
-          if (overlappingBooking) {
-            throw new ConflictException(
-              'Time slot conflicts with existing booking',
-            );
-          }
-          return tx.booking.create({
-            data: {
-              userId,
-              roomId,
-              startTime: start,
-              endTime: end,
-              status: BookingStatus.CONFIRMED,
-            },
-            include: { room: true },
-          });
-        },
-        { isolationLevel: 'Serializable' },
-      );
+            const overlappingBooking = await tx.booking.findFirst({
+              where: {
+                roomId,
+                status: BookingStatus.CONFIRMED,
+                startTime: { lt: end }, // booking starts before requested end
+                endTime: { gt: start }, // booking ends after requested start
+              },
+            });
+            if (overlappingBooking) {
+              throw new ConflictException(
+                'Time slot conflicts with existing booking',
+              );
+            }
+            return tx.booking.create({
+              data: {
+                userId,
+                roomId,
+                startTime: start,
+                endTime: end,
+                status: BookingStatus.CONFIRMED,
+              },
+              include: { room: true },
+            });
+          },
+          { isolationLevel: 'Serializable' },
+        );
+      });
     } catch (error) {
       if (
         error instanceof NotFoundException ||
